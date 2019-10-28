@@ -8,7 +8,7 @@ from operator import itemgetter
 if len(sys.argv)>1: 
     inputfile=sys.argv[1]
 else:
-    sys.exit("Nie podano pliku wejściowego.")
+    sys.exit("Nie podano pliku wejsciowego.")
 
 if len(sys.argv)>2: 
     outputfile=sys.argv[2]
@@ -39,10 +39,10 @@ for i in input:
         L=int(line[0])
         N=int(line[1])
         dl=int(line[2])
-    if len(line)>3: sys.exit("Zły format pliku wejściowego: za dużo argumentów w linii.")
+    if len(line)>3: sys.exit("Zly format pliku wejsciowego: za duzo argumentow w linii.")
 
 
-if(count3!=1):     sys.exit("Pierwsza linia pliku jest nieprawidłowa. \n Format: długość sztabki [mm] liczba sztabek | szerokość spawu [mm] ")
+if(count3!=1):     sys.exit("Pierwsza linia pliku jest nieprawidlowa. \n Format: dlugosc profilu [mm] liczba profili | szerokosc ciecia [mm] ")
 
 sumA=L*N
 sumN=0.0
@@ -51,18 +51,18 @@ for i in cpinput:
     sumN += i[0]*i[1]
     items += i[1]
 
-if(sumA<sumN): sys.exit("SPAWN MORE pretów! Wincyj prętów!")
+if(sumA<sumN): sys.exit("SPAWN MORE pretow! Wincyj pretow!")
 
 cpaval=[L]*N*2 # TODO maybe change items to items?
+f = open(outputfile,'w')
+f.write("###### Informacje ###### \n")
+f.write("### Dlugosc profilu: {} mm \n### liczba profili: {} \n### Szerokosc ciecia: {} mm\n\n".format(L,N,dl))
 
-print "\n###### Informacje ###### "
-print "### Długość sztabki:",L,"mm \n### liczba sztabek:",N,"\n### Szerokość spawu:",dl,"mm\n "
-
-print "Sortowanie od największego kawałka [długość, #sztuk]:"
+f.write("### Sortowanie od najwiekszego kawalka [dlugosc, #sztuk]:\n")
 cpinput=sorted(cpinput,key=itemgetter(0),reverse=True)
 for i in xrange(len(cpinput)):
-    print "Item"+str(i+1)+":", cpinput[i]
-
+    f.write("Item{}: {}\n".format(str(i+1), cpinput[i]))
+f.write("\n")
 
 out=[[] for _ in xrange(items)]
 
@@ -95,21 +95,27 @@ for it in xrange(items):
 # print out
 # for i in xrange(items):
 #     print out[i]
-print "\nŚcinki:", scraps, "mm"
+f.write("\nScinki (lacznie): {} mm\n".format(scraps))
 scraps = -scraps    
 rods=0
-f = open(outputfile,'w')
+
+
+f.write("### Ciachaj kolejne profile w ten sposób: \n")
+
+i = 0
 for o in out:
     if len(o)>0:
-        txt = " | ".join(list(map(str,o)))
-        print txt
+        i+=1
+        txt = "Profil nr {} ({}/{}): ".format(i,sum(o),L)
+        txt += " | ".join(list(map(str,o)))
+        # print txt
         f.write(txt+'\n')
         scraps += L-sum(o)
         rods+=1
+f.write("\nResztki: {} mm".format(scraps))
+f.write("\nPotrzebnych profili: {}".format(rods))
+f.write("\nWydajnosc: {0:.2f} %\n".format(100.*(rods*L-scraps)/(rods*L)))
 f.close()
-print "\nResztki:",scraps, "mm"
-print "\nSztabek trzeba:",rods
-print "\nWydajność:",(rods*L-scraps)/(rods*L),"%"
 
 
 # output format:
